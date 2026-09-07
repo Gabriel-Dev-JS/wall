@@ -1,18 +1,46 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { SQLiteProvider } from 'expo-sqlite';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { migrateDbIfNeeded } from '@/db/schema';
+import { ThemeModeProvider, useThemeMode } from '@/hooks/theme-mode-provider';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+function RootNavigator() {
+  const { resolvedScheme } = useThemeMode();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={resolvedScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AnimatedSplashOverlay />
-      <AppTabs />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="new-transaction"
+          options={{
+            presentation: 'modal',
+            headerShown: true,
+            title: 'Novo lançamento',
+          }}
+        />
+        <Stack.Screen
+          name="month/[month]"
+          options={{
+            headerShown: true,
+            title: 'Mês',
+          }}
+        />
+      </Stack>
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SQLiteProvider databaseName="wall.db" onInit={migrateDbIfNeeded}>
+      <ThemeModeProvider>
+        <RootNavigator />
+      </ThemeModeProvider>
+    </SQLiteProvider>
   );
 }
