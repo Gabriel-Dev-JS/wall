@@ -1,0 +1,445 @@
+me explique como eu poderia criar este app com o claudecode(nunca usei antes)
+
+O ChatGPT disse:
+Sim — e, para o seu projeto, Claude Code pode ser uma ótima forma de construir o app mesmo que você nunca tenha usado antes.
+
+Na verdade, eu não tentaria aprender React Native inteiro antes de começar. Eu faria o Claude Code trabalhar como seu programador auxiliar, enquanto você toma as decisões do produto.
+
+A combinação que eu usaria hoje seria:
+
+Claude Code + Expo + React Native + TypeScript + expo-sqlite
+
+O próprio Expo atualmente documenta o uso de agentes de IA e tem um plugin oficial para Claude Code. 
+D
+Documentação Expo
+
+1. Primeiro: o que é o Claude Code?
+Pense nele como um programador que trabalha dentro da pasta do seu projeto.
+
+Em vez de você ficar copiando código do ChatGPT para o VS Code, você abre o terminal dentro do projeto e conversa com o Claude.
+
+Por exemplo, você poderia dizer:
+
+"Crie uma tela inicial para meu aplicativo de controle financeiro. Quero mostrar o total gasto hoje, uma lista das despesas e um botão para adicionar uma nova despesa."
+
+Ele pode:
+
+criar arquivos;
+modificar arquivos existentes;
+instalar dependências;
+executar comandos;
+analisar erros;
+refatorar código;
+testar o que fez;
+explicar o que está acontecendo.
+E você pode continuar:
+
+"Não gostei dessa tela. Deixe mais simples e parecida com o design do Nubank."
+
+E ele altera o projeto.
+
+2. O que você precisa instalar
+Eu começaria com:
+
+Node.js LTS
+VS Code
+Claude Code
+Expo
+um celular Android para testar
+O Expo suporta Windows, macOS e Linux, e recomenda Node.js LTS. 
+D
+Documentação Expo
++1
+
+Você não precisa começar instalando Android Studio se tiver um celular Android disponível.
+
+Isso deixa tudo muito mais simples.
+
+3. Criando o projeto
+Abra o terminal e faça:
+
+npx create-expo-app@latest minhas-contas
+
+Depois:
+
+cd minhas-contas
+
+O create-expo-app é justamente o mecanismo recomendado atualmente pelo Expo para iniciar um projeto. 
+D
+Documentação Expo
+
+Depois você inicia:
+
+npx expo start
+
+O Expo mostra um QR Code. Você pode abrir o projeto no celular usando o Expo Go durante o desenvolvimento. 
+D
+Documentação Expo
+
+4. Agora entra o Claude Code
+Dentro da pasta:
+
+minhas-contas
+
+você abre o Claude Code.
+
+A ideia é não mandar simplesmente "faça meu aplicativo".
+
+Isso tende a gerar um projeto bagunçado.
+
+Eu faria em etapas.
+
+Por exemplo, a primeira instrução poderia ser:
+
+Quero criar um aplicativo mobile chamado Minhas Contas.
+
+Ele será desenvolvido com Expo, React Native e TypeScript.
+
+O aplicativo será 100% offline.
+
+Não quero backend, API, Firebase, Supabase ou autenticação.
+
+Os dados serão armazenados localmente usando expo-sqlite.
+
+Antes de escrever código, analise o projeto atual e me proponha uma arquitetura de pastas adequada para esse aplicativo.
+
+Não implemente ainda. Apenas explique a arquitetura e aguarde minha aprovação.
+
+Isso é importante.
+
+Faça o Claude pensar junto com você antes de sair criando código.
+
+5. Depois você instala o SQLite
+Quando a arquitetura estiver definida:
+
+npx expo install expo-sqlite
+
+O expo-sqlite fornece acesso ao SQLite e mantém o banco persistido entre reinicializações do aplicativo. 
+D
+Documentação Expo
+
+E aí você pode pedir:
+
+Agora implemente a camada de banco de dados usando expo-sqlite.
+
+Quero uma tabela de lançamentos com:
+
+id
+descrição
+valor
+tipo
+categoria
+data de criação
+Tipo pode ser "receita" ou "despesa".
+
+Crie também funções para:
+
+inserir lançamento
+buscar lançamentos
+atualizar lançamento
+excluir lançamento
+calcular total de receitas
+calcular total de despesas
+calcular saldo
+Separe a lógica de banco da interface.
+
+E deixe ele implementar.
+
+6. Eu faria o app em pequenas etapas
+Seu aplicativo poderia começar assim:
+
+Tela inicial
+┌──────────────────────────┐
+│       Minhas Contas      │
+│                          │
+│       Saldo do mês       │
+│        R$ 2.350,00       │
+│                          │
+│  Receitas     Despesas   │
+│  R$ 4.000     R$ 1.650   │
+│                          │
+│ ───────────────────────  │
+│                          │
+│ Hoje                     │
+│                          │
+│ 🍔 Almoço       - R$ 35  │
+│ 🚗 Combustível  - R$ 80  │
+│ ☕ Café         - R$ 8   │
+│                          │
+│                    [+]   │
+└──────────────────────────┘
+
+Depois:
+
+Adicionar lançamento
+
+Descrição
+[ Almoço                  ]
+
+Valor
+[ R$ 35,00                ]
+
+Categoria
+[ Alimentação          ▼ ]
+
+Tipo
+(•) Despesa
+( ) Receita
+
+[       SALVAR          ]
+
+Depois:
+
+Histórico
+
+Setembro 2026
+
+01/09
+Aluguel             R$ 1.200
+Mercado               R$ 350
+Restaurante             R$ 80
+
+02/09
+Combustível             R$ 100
+...
+
+Depois você pede ao Claude:
+
+Agora implemente a tela de histórico.
+
+Depois:
+
+Agora implemente edição.
+
+Depois:
+
+Agora implemente exclusão com confirmação.
+
+E assim por diante.
+
+7. Uma coisa MUITO importante: não deixe o Claude inventar tudo
+Esse é provavelmente o maior conselho que eu daria para alguém começando com Claude Code.
+
+Você não precisa saber programar profundamente, mas precisa ser o dono da arquitetura e das regras do produto.
+
+Por exemplo, decida:
+
+Uma despesa de R$ 50 é armazenada como 50.00 ou 5000?
+
+Eu recomendaria armazenar dinheiro como inteiro em centavos:
+
+R$ 10,50 → 1050
+R$ 99,90 → 9990
+
+Isso evita vários problemas de precisão de ponto flutuante.
+
+Então você pode dizer ao Claude:
+
+Valores monetários devem ser armazenados como inteiros em centavos. Nunca utilize float para representar dinheiro.
+
+Esse tipo de regra é muito importante.
+
+8. Crie um "contrato" para o Claude
+Eu também faria você ter um arquivo de instruções do projeto.
+
+O Expo atualmente cria arquivos de contexto como AGENTS.md e CLAUDE.md em projetos novos, e documenta o uso do plugin oficial do Expo para Claude Code. 
+D
+Documentação Expo
+
+No CLAUDE.md, podemos colocar coisas como:
+
+# Projeto Minhas Contas
+
+## Objetivo
+
+Aplicativo mobile para controle simples de receitas e despesas.
+
+## Tecnologias
+
+- Expo
+- React Native
+- TypeScript
+- expo-sqlite
+
+## Regras
+
+- O aplicativo deve funcionar 100% offline.
+- Não criar backend.
+- Não utilizar Firebase.
+- Não utilizar Supabase.
+- Não utilizar APIs externas.
+- Valores monetários devem ser armazenados em centavos.
+- Código deve ser TypeScript.
+- Separar lógica de negócio da interface.
+- Evitar dependências desnecessárias.
+- Priorizar simplicidade.
+
+Assim, conforme o projeto cresce, o Claude tem um contexto permanente.
+
+9. E o Claude consegue corrigir erros?
+Essa é uma das partes mais interessantes.
+
+Imagine que você rode:
+
+npx expo start
+
+e apareça um erro.
+
+Você pode simplesmente falar para o Claude:
+
+Estou recebendo este erro:
+
+[cole o erro]
+
+Analise a causa e corrija o problema. Antes de alterar arquivos, explique brevemente o que está causando o erro.
+
+Ele consegue analisar o código e trabalhar em cima disso.
+
+E você pode inclusive pedir:
+
+Rode os testes depois da correção.
+
+Esse fluxo de:
+
+implementar → executar → encontrar erro → corrigir → testar
+
+é onde um agente de programação fica realmente útil.
+
+10. Depois vem o visual
+Eu não começaria pelo visual.
+
+Primeiro:
+
+Banco → regras → telas → funcionamento → visual → testes.
+
+Depois você pode pedir:
+
+Agora faça uma revisão visual completa do aplicativo. Quero um design moderno, minimalista e agradável, com foco em facilidade de uso. O aplicativo deve parecer um produto comercial, não um protótipo.
+
+Aí vocês podem iterar.
+
+Você olha no celular e fala:
+
+O botão está muito grande.
+
+O valor deveria ter mais destaque.
+
+Quero que despesas apareçam em vermelho.
+
+Quero uma animação quando adicionar uma conta.
+
+E o Claude vai fazendo.
+
+11. Depois você testa no celular
+Durante o desenvolvimento:
+
+npx expo start
+
+e testa no aparelho.
+
+Quando começar a utilizar funcionalidades nativas que exigem uma build própria, você pode usar EAS Build. O Expo oferece builds Android/iOS na nuvem e atualmente há um plano gratuito para começar. 
+D
+Documentação Expo
++1
+
+Para uma build de desenvolvimento Android, por exemplo:
+
+eas build --platform android --profile development
+
+O resultado pode ser instalado no aparelho para testes. 
+D
+Documentação Expo
+
+12. E finalmente publicar
+Quando o aplicativo estiver pronto:
+
+Claude Code
+     ↓
+Expo
+     ↓
+EAS Build
+     ↓
+arquivo .aab
+     ↓
+Google Play Console
+     ↓
+seu aplicativo
+
+Para a Play Store, a build de produção Android é um .aab. O Expo documenta o processo de criação da build e posterior envio para a Google Play. 
+D
+Documentação Expo
++1
+
+O comando de produção pode ser:
+
+eas build --platform android --profile production
+
+Depois você envia o .aab para a Play Store.
+
+13. O que eu faria no seu lugar
+Eu não tentaria construir o aplicativo inteiro de uma vez.
+
+Faria este roadmap:
+
+Fase 1 — Projeto
+Expo
+TypeScript
+Claude Code
+estrutura de pastas
+Fase 2 — Banco
+SQLite
+tabela de lançamentos
+categorias
+CRUD
+Fase 3 — MVP
+tela inicial
+adicionar despesa
+adicionar receita
+histórico
+editar
+excluir
+totais
+Fase 4 — Produto
+design profissional
+ícones
+animações
+dark mode
+onboarding
+tratamento de erros
+Fase 5 — Segurança dos dados
+exportar banco/dados
+importar backup
+confirmação antes de apagar
+tratamento de migrações do SQLite
+Fase 6 — Monetização
+versão gratuita
+versão Pro
+compra única
+recursos premium
+Fase 7 — Publicação
+ícone
+screenshots
+descrição
+política de privacidade
+.aab
+testes internos
+publicação na Google Play
+E tem uma coisa que eu faria diferente no seu caso
+Como você nunca usou Claude Code, eu não começaria simplesmente instalando e tentando descobrir tudo sozinho.
+
+Podemos fazer isso juntos, passo a passo, como se eu estivesse te acompanhando na criação do aplicativo.
+
+Você poderia começar literalmente do zero:
+
+Passo 1: instalar Node.js
+Passo 2: instalar Claude Code
+Passo 3: criar o projeto Expo
+Passo 4: abrir o Claude Code
+Passo 5: dar a primeira instrução para ele
+Passo 6: criar o SQLite
+Passo 7: construir a primeira tela
+Passo 8: testar no seu celular
+
+E eu posso te fornecer os prompts exatos que você vai colocar no Claude Code em cada etapa, inclusive dizendo quando você deve aceitar/rejeitar uma alteração e explicando o código que ele produzir.
+
+Isso seria, na minha opinião, uma maneira muito melhor de você aprender construindo o seu próprio aplicativo, em vez de tentar aprender React Native inteiro antes de começar.
