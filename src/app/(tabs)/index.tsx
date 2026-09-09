@@ -31,7 +31,8 @@ export default function HomeScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
           <ThemedText type="small" themeColor="textSecondary">
-            Valor livre (receitas − despesas)
+            Valor livre
+            {/* Valor livre (receitas − despesas) */}
           </ThemedText>
           <ThemedText type="title" themeColor={monthBalance < 0 ? 'negative' : 'text'}>
             {formatCentsToBRL(monthBalance)}
