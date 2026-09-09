@@ -1,7 +1,50 @@
 import type { CategoryId } from '@/constants/categories';
-import { monthKey } from '@/utils/date';
+import { monthKey, yearKey } from '@/utils/date';
 
+import { balance } from './calculations';
 import type { Transaction } from './types';
+
+export interface MonthGroup {
+  key: string;
+  count: number;
+  total: number;
+}
+
+export function groupByMonth(transactions: Transaction[]): MonthGroup[] {
+  const groups = new Map<string, Transaction[]>();
+  for (const transaction of transactions) {
+    const key = monthKey(transaction.date);
+    const items = groups.get(key) ?? [];
+    items.push(transaction);
+    groups.set(key, items);
+  }
+  return Array.from(groups.entries()).map(([key, items]) => ({
+    key,
+    count: items.length,
+    total: balance(items),
+  }));
+}
+
+export interface YearGroup {
+  key: string;
+  monthCount: number;
+  total: number;
+}
+
+export function groupByYear(transactions: Transaction[]): YearGroup[] {
+  const groups = new Map<string, Transaction[]>();
+  for (const transaction of transactions) {
+    const key = yearKey(transaction.date);
+    const items = groups.get(key) ?? [];
+    items.push(transaction);
+    groups.set(key, items);
+  }
+  return Array.from(groups.entries()).map(([key, items]) => ({
+    key,
+    monthCount: new Set(items.map((item) => monthKey(item.date))).size,
+    total: balance(items),
+  }));
+}
 
 export interface MonthTotal {
   key: string;

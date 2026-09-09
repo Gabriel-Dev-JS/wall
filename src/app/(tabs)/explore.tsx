@@ -7,39 +7,13 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ThemeModeToggle } from '@/components/theme-mode-toggle';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { balance } from '@/domain/transactions/calculations';
-import { monthlyExpenseTotals } from '@/domain/transactions/reports';
-import type { Transaction } from '@/domain/transactions/types';
+import { groupByYear, monthlyExpenseTotals } from '@/domain/transactions/reports';
 import { useTransactions } from '@/hooks/use-transactions';
-import { formatMonthLabel, monthKey } from '@/utils/date';
 import { formatCentsToBRL } from '@/utils/money';
-
-interface MonthGroup {
-  key: string;
-  label: string;
-  count: number;
-  total: number;
-}
-
-function groupByMonth(transactions: Transaction[]): MonthGroup[] {
-  const groups = new Map<string, Transaction[]>();
-  for (const transaction of transactions) {
-    const key = monthKey(transaction.date);
-    const items = groups.get(key) ?? [];
-    items.push(transaction);
-    groups.set(key, items);
-  }
-  return Array.from(groups.entries()).map(([key, items]) => ({
-    key,
-    label: formatMonthLabel(key),
-    count: items.length,
-    total: balance(items),
-  }));
-}
 
 export default function HistoryScreen() {
   const { transactions } = useTransactions();
-  const groups = groupByMonth(transactions);
+  const groups = groupByYear(transactions).sort((a, b) => b.key.localeCompare(a.key));
   const monthlyExpenses = monthlyExpenseTotals(transactions);
 
   return (
@@ -57,7 +31,7 @@ export default function HistoryScreen() {
           </View>
 
           <View style={styles.section}>
-            <ThemedText type="smallBold">Meses</ThemedText>
+            <ThemedText type="smallBold">Anos</ThemedText>
 
             {groups.length === 0 ? (
               <ThemedText type="small" themeColor="textSecondary">
@@ -69,13 +43,13 @@ export default function HistoryScreen() {
                   <Pressable
                     key={group.key}
                     onPress={() =>
-                      router.push({ pathname: '/month/[month]', params: { month: group.key } })
+                      router.push({ pathname: '/year/[year]', params: { year: group.key } })
                     }>
                     <ThemedView type="backgroundElement" style={styles.folderRow}>
                       <View style={styles.folderInfo}>
-                        <ThemedText type="default">{group.label}</ThemedText>
+                        <ThemedText type="default">{group.key}</ThemedText>
                         <ThemedText type="small" themeColor="textSecondary">
-                          {group.count} lançamento{group.count === 1 ? '' : 's'}
+                          {group.monthCount} {group.monthCount === 1 ? 'mês' : 'meses'}
                         </ThemedText>
                       </View>
                       <ThemedText

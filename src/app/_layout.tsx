@@ -1,6 +1,7 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { migrateDbIfNeeded } from '@/db/schema';
@@ -30,6 +31,13 @@ function RootNavigator() {
             title: 'Mês',
           }}
         />
+        <Stack.Screen
+          name="year/[year]"
+          options={{
+            headerShown: true,
+            title: 'Ano',
+          }}
+        />
       </Stack>
     </ThemeProvider>
   );
@@ -37,10 +45,12 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <SQLiteProvider databaseName="wall.db" onInit={migrateDbIfNeeded}>
-      <ThemeModeProvider>
-        <RootNavigator />
-      </ThemeModeProvider>
-    </SQLiteProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SQLiteProvider databaseName="wall.db" onInit={migrateDbIfNeeded}>
+        <ThemeModeProvider>
+          <RootNavigator />
+        </ThemeModeProvider>
+      </SQLiteProvider>
+    </GestureHandlerRootView>
   );
 }

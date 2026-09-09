@@ -1,5 +1,5 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AddTransactionFab } from '@/components/add-transaction-fab';
@@ -10,15 +10,20 @@ import { TransactionRow } from '@/components/transaction-row';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { balance, totalExpense, totalIncome } from '@/domain/transactions/calculations';
 import { expensesByCategory } from '@/domain/transactions/reports';
+import { useConfirmDeleteMonth } from '@/hooks/use-confirm-delete-month';
 import { useConfirmDeleteTransaction } from '@/hooks/use-confirm-delete-transaction';
 import { useTransactions } from '@/hooks/use-transactions';
-import { formatMonthLabel, monthKey } from '@/utils/date';
+import { formatMonthLabel, isCurrentMonth, monthKey } from '@/utils/date';
 import { formatCentsToBRL } from '@/utils/money';
 
 export default function MonthScreen() {
   const { month } = useLocalSearchParams<{ month: string }>();
   const { transactions, reload } = useTransactions();
   const confirmDelete = useConfirmDeleteTransaction(reload);
+  const confirmDeleteMonth = useConfirmDeleteMonth(() => {
+    reload();
+    router.back();
+  });
 
   const monthTransactions = transactions.filter((transaction) => monthKey(transaction.date) === month);
   const income = totalIncome(monthTransactions);
@@ -26,6 +31,7 @@ export default function MonthScreen() {
   const monthBalance = balance(monthTransactions);
   const categoryTotals = expensesByCategory(monthTransactions);
   const label = month ? formatMonthLabel(month) : '';
+  const isEditable = month ? isCurrentMonth(month) : true;
 
   return (
     <ThemedView style={styles.container}>
@@ -71,6 +77,12 @@ export default function MonthScreen() {
 
           <View style={styles.section}>
             <ThemedText type="smallBold">Lançamentos</ThemedText>
+            {!isEditable && (
+              <ThemedText type="small" themeColor="textSecondary">
+                Meses anteriores são somente leitura. Para remover dados deste mês, exclua o mês
+                inteiro abaixo.
+              </ThemedText>
+            )}
             {monthTransactions.length === 0 ? (
               <ThemedText type="small" themeColor="textSecondary">
                 Nenhum lançamento neste mês.
@@ -82,12 +94,20 @@ export default function MonthScreen() {
                     key={transaction.id}
                     transaction={transaction}
                     showDate
-                    onLongPress={() => confirmDelete(transaction)}
+                    onDelete={isEditable ? () => confirmDelete(transaction) : undefined}
                   />
                 ))}
               </View>
             )}
           </View>
+
+          {!isEditable && monthTransactions.length > 0 && (
+            <Pressable style={styles.deleteMonthButton} onPress={() => month && confirmDeleteMonth(month)}>
+              <ThemedText themeColor="negative" type="smallBold">
+                Apagar mês inteiro
+              </ThemedText>
+            </Pressable>
+          )}
         </ScrollView>
 
         <AddTransactionFab />
@@ -133,5 +153,9 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: Spacing.two,
+  },
+  deleteMonthButton: {
+    alignItems: 'center',
+    paddingVertical: Spacing.two,
   },
 });

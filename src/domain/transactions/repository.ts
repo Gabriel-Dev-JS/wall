@@ -75,3 +75,7 @@ export async function updateTransaction(
 export async function deleteTransaction(db: SQLiteDatabase, id: number): Promise<void> {
   await db.runAsync('DELETE FROM transactions WHERE id = ?', [id]);
 }
+
+export async function deleteTransactionsByMonth(db: SQLiteDatabase, month: string): Promise<void> {
+  await db.runAsync('DELETE FROM transactions WHERE date LIKE ?', [`${month}%`]);
+}

@@ -70,7 +70,7 @@ export default function HomeScreen() {
                 <TransactionRow
                   key={transaction.id}
                   transaction={transaction}
-                  onLongPress={() => confirmDelete(transaction)}
+                  onDelete={() => confirmDelete(transaction)}
                 />
               ))}
             </ThemedView>

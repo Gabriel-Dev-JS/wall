@@ -16,6 +16,7 @@ import {
 } from '@/domain/transactions/repository';
 import type { NewTransaction, Transaction, TransactionType } from '@/domain/transactions/types';
 import { useTheme } from '@/hooks/use-theme';
+import { isCurrentMonth, monthKey } from '@/utils/date';
 import { centsFromDigits, formatCentsToBRL } from '@/utils/money';
 
 export default function NewTransactionScreen() {
@@ -75,8 +76,10 @@ export default function NewTransactionScreen() {
     router.back();
   }
 
+  const canDelete = existing ? isCurrentMonth(monthKey(existing.date)) : false;
+
   function handleDelete() {
-    if (!existing) return;
+    if (!existing || !canDelete) return;
     Alert.alert('Excluir lançamento', `Deseja excluir "${existing.description}"?`, [
       { text: 'Cancelar', style: 'cancel' },
       {
@@ -176,12 +179,18 @@ export default function NewTransactionScreen() {
         <Pressable style={styles.saveButton} onPress={handleSave}>
           <ThemedText style={styles.saveButtonLabel}>Salvar</ThemedText>
         </Pressable>
-        {existing && (
+        {existing && canDelete && (
           <Pressable style={styles.deleteButton} onPress={handleDelete}>
             <ThemedText themeColor="negative" type="smallBold">
               Excluir lançamento
             </ThemedText>
           </Pressable>
+        )}
+        {existing && !canDelete && (
+          <ThemedText type="small" themeColor="textSecondary" style={styles.readOnlyHint}>
+            Lançamentos de meses anteriores não podem ser excluídos individualmente. Apague o mês
+            inteiro na tela do mês.
+          </ThemedText>
         )}
       </SafeAreaView>
     </ThemedView>
@@ -253,6 +262,10 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     alignItems: 'center',
+    paddingVertical: Spacing.two,
+  },
+  readOnlyHint: {
+    textAlign: 'center',
     paddingVertical: Spacing.two,
   },
 });

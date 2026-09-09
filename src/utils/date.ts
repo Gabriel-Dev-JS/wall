@@ -6,6 +6,14 @@ export function monthKey(isoDate: string): string {
   return isoDate.slice(0, 7);
 }
 
+export function yearKey(monthOrIsoDate: string): string {
+  return monthOrIsoDate.slice(0, 4);
+}
+
+export function isCurrentMonth(month: string): boolean {
+  return month === monthKey(new Date().toISOString());
+}
+
 export function formatMonthLabel(isoMonth: string): string {
   const [year, month] = isoMonth.split('-').map(Number);
   const label = new Date(year, month - 1, 1).toLocaleDateString('pt-BR', {
