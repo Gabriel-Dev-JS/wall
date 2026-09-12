@@ -79,3 +79,7 @@ export async function deleteTransaction(db: SQLiteDatabase, id: number): Promise
 export async function deleteTransactionsByMonth(db: SQLiteDatabase, month: string): Promise<void> {
   await db.runAsync('DELETE FROM transactions WHERE date LIKE ?', [`${month}%`]);
 }
+
+export async function deleteTransactionsByYear(db: SQLiteDatabase, year: string): Promise<void> {
+  await db.runAsync('DELETE FROM transactions WHERE date LIKE ?', [`${year}%`]);
+}

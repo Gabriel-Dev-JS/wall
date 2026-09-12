@@ -1,20 +1,29 @@
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MonthlyBarChart } from '@/components/charts/monthly-bar-chart';
+import { FolderRow } from '@/components/folder-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { ThemeModeToggle } from '@/components/theme-mode-toggle';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { transactionsToCsv } from '@/domain/transactions/csv';
 import { groupByYear, monthlyExpenseTotals } from '@/domain/transactions/reports';
+import { useConfirmDeleteYear } from '@/hooks/use-confirm-delete-year';
 import { useTransactions } from '@/hooks/use-transactions';
-import { formatCentsToBRL } from '@/utils/money';
+import { exportCsv } from '@/utils/csv-export';
+import { yearKey } from '@/utils/date';
 
-export default function HistoryScreen() {
-  const { transactions } = useTransactions();
+export default function MetricsScreen() {
+  const { transactions, reload } = useTransactions();
+  const confirmDeleteYear = useConfirmDeleteYear(reload);
   const groups = groupByYear(transactions).sort((a, b) => b.key.localeCompare(a.key));
   const monthlyExpenses = monthlyExpenseTotals(transactions);
+
+  function handleExportYear(year: string) {
+    const yearTransactions = transactions.filter((transaction) => yearKey(transaction.date) === year);
+    exportCsv(`transacoes-${year}.csv`, transactionsToCsv(yearTransactions));
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -23,7 +32,7 @@ export default function HistoryScreen() {
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
-          <ThemedText type="subtitle">Histórico</ThemedText>
+          <ThemedText type="subtitle">Métricas</ThemedText>
 
           <View style={styles.section}>
             <ThemedText type="smallBold">Gastos por mês</ThemedText>
@@ -40,33 +49,20 @@ export default function HistoryScreen() {
             ) : (
               <View style={styles.folderList}>
                 {groups.map((group) => (
-                  <Pressable
+                  <FolderRow
                     key={group.key}
+                    label={group.key}
+                    subtitle={`${group.monthCount} ${group.monthCount === 1 ? 'mês' : 'meses'}`}
+                    total={group.total}
                     onPress={() =>
                       router.push({ pathname: '/year/[year]', params: { year: group.key } })
-                    }>
-                    <ThemedView type="backgroundElement" style={styles.folderRow}>
-                      <View style={styles.folderInfo}>
-                        <ThemedText type="default">{group.key}</ThemedText>
-                        <ThemedText type="small" themeColor="textSecondary">
-                          {group.monthCount} {group.monthCount === 1 ? 'mês' : 'meses'}
-                        </ThemedText>
-                      </View>
-                      <ThemedText
-                        type="smallBold"
-                        themeColor={group.total < 0 ? 'negative' : 'positive'}>
-                        {formatCentsToBRL(group.total)}
-                      </ThemedText>
-                    </ThemedView>
-                  </Pressable>
+                    }
+                    onExport={() => handleExportYear(group.key)}
+                    onDelete={() => confirmDeleteYear(group.key)}
+                  />
                 ))}
               </View>
             )}
-          </View>
-
-          <View style={styles.section}>
-            <ThemedText type="smallBold">Aparência</ThemedText>
-            <ThemeModeToggle />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -98,16 +94,5 @@ const styles = StyleSheet.create({
   },
   folderList: {
     gap: Spacing.two,
-  },
-  folderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-    borderRadius: Spacing.three,
-  },
-  folderInfo: {
-    gap: 2,
   },
 });

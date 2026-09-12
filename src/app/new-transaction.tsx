@@ -16,6 +16,7 @@ import {
 } from '@/domain/transactions/repository';
 import type { NewTransaction, Transaction, TransactionType } from '@/domain/transactions/types';
 import { useTheme } from '@/hooks/use-theme';
+import { confirmDestructive } from '@/utils/confirm';
 import { isCurrentMonth, monthKey } from '@/utils/date';
 import { centsFromDigits, formatCentsToBRL } from '@/utils/money';
 
@@ -78,19 +79,17 @@ export default function NewTransactionScreen() {
 
   const canDelete = existing ? isCurrentMonth(monthKey(existing.date)) : false;
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!existing || !canDelete) return;
-    Alert.alert('Excluir lançamento', `Deseja excluir "${existing.description}"?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteTransaction(db, existing.id);
-          router.back();
-        },
-      },
-    ]);
+    const confirmed = await confirmDestructive(
+      'Excluir lançamento',
+      `Deseja excluir "${existing.description}"?`,
+      'Excluir'
+    );
+    if (!confirmed) return;
+
+    await deleteTransaction(db, existing.id);
+    router.back();
   }
 
   if (isLoading) {

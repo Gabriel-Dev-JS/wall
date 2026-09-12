@@ -1,23 +1,33 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { FolderRow } from '@/components/folder-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { balance } from '@/domain/transactions/calculations';
+import { transactionsToCsv } from '@/domain/transactions/csv';
 import { groupByMonth } from '@/domain/transactions/reports';
+import { useConfirmDeleteMonth } from '@/hooks/use-confirm-delete-month';
 import { useTransactions } from '@/hooks/use-transactions';
-import { formatMonthLabel, yearKey } from '@/utils/date';
+import { exportCsv } from '@/utils/csv-export';
+import { formatMonthLabel, monthKey, yearKey } from '@/utils/date';
 import { formatCentsToBRL } from '@/utils/money';
 
 export default function YearScreen() {
   const { year } = useLocalSearchParams<{ year: string }>();
-  const { transactions } = useTransactions();
+  const { transactions, reload } = useTransactions();
+  const confirmDeleteMonth = useConfirmDeleteMonth(reload);
 
   const yearTransactions = transactions.filter((transaction) => yearKey(transaction.date) === year);
   const yearBalance = balance(yearTransactions);
   const months = groupByMonth(yearTransactions).sort((a, b) => b.key.localeCompare(a.key));
+
+  function handleExportMonth(month: string) {
+    const monthTransactions = transactions.filter((transaction) => monthKey(transaction.date) === month);
+    exportCsv(`transacoes-${month}.csv`, transactionsToCsv(monthTransactions));
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -47,25 +57,17 @@ export default function YearScreen() {
             ) : (
               <View style={styles.folderList}>
                 {months.map((month) => (
-                  <Pressable
+                  <FolderRow
                     key={month.key}
+                    label={formatMonthLabel(month.key)}
+                    subtitle={`${month.count} lançamento${month.count === 1 ? '' : 's'}`}
+                    total={month.total}
                     onPress={() =>
                       router.push({ pathname: '/month/[month]', params: { month: month.key } })
-                    }>
-                    <ThemedView type="backgroundElement" style={styles.folderRow}>
-                      <View style={styles.folderInfo}>
-                        <ThemedText type="default">{formatMonthLabel(month.key)}</ThemedText>
-                        <ThemedText type="small" themeColor="textSecondary">
-                          {month.count} lançamento{month.count === 1 ? '' : 's'}
-                        </ThemedText>
-                      </View>
-                      <ThemedText
-                        type="smallBold"
-                        themeColor={month.total < 0 ? 'negative' : 'positive'}>
-                        {formatCentsToBRL(month.total)}
-                      </ThemedText>
-                    </ThemedView>
-                  </Pressable>
+                    }
+                    onExport={() => handleExportMonth(month.key)}
+                    onDelete={() => confirmDeleteMonth(month.key)}
+                  />
                 ))}
               </View>
             )}
@@ -103,16 +105,5 @@ const styles = StyleSheet.create({
   },
   folderList: {
     gap: Spacing.two,
-  },
-  folderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-    borderRadius: Spacing.three,
-  },
-  folderInfo: {
-    gap: 2,
   },
 });
