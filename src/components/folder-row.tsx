@@ -1,11 +1,11 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Swipeable } from 'react-native-gesture-handler';
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-import { formatCentsToBRL } from '@/utils/money';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
+import { formatCentsToBRL } from "@/utils/money";
 
 interface FolderRowProps {
   label: string;
@@ -16,7 +16,14 @@ interface FolderRowProps {
   onDelete?: () => void;
 }
 
-export function FolderRow({ label, subtitle, total, onPress, onExport, onDelete }: FolderRowProps) {
+export function FolderRow({
+  label,
+  subtitle,
+  total,
+  onPress,
+  onExport,
+  onDelete,
+}: FolderRowProps) {
   const theme = useTheme();
 
   return (
@@ -29,22 +36,29 @@ export function FolderRow({ label, subtitle, total, onPress, onExport, onDelete 
             onPress={() => {
               swipeable.close();
               onExport();
-            }}>
+            }}
+          >
             <Text style={styles.actionIcon}>📄</Text>
           </Pressable>
           {onDelete && (
             <Pressable
-              style={[styles.actionButton, { backgroundColor: theme.negative }]}
+              style={[styles.actionButton, {}]}
+              // style={[styles.actionButton, { backgroundColor: theme.negative }]}
               onPress={() => {
                 swipeable.close();
                 onDelete();
-              }}>
+              }}
+            >
               <Text style={styles.actionIcon}>🗑️</Text>
             </Pressable>
           )}
         </View>
-      )}>
-      <Pressable onPress={onPress} style={({ pressed }) => pressed && styles.pressed}>
+      )}
+    >
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => pressed && styles.pressed}
+      >
         <ThemedView type="backgroundElement" style={styles.row}>
           <View style={styles.info}>
             <ThemedText type="default">{label}</ThemedText>
@@ -52,7 +66,10 @@ export function FolderRow({ label, subtitle, total, onPress, onExport, onDelete 
               {subtitle}
             </ThemedText>
           </View>
-          <ThemedText type="smallBold" themeColor={total < 0 ? 'negative' : 'positive'}>
+          <ThemedText
+            type="smallBold"
+            themeColor={total < 0 ? "negative" : "positive"}
+          >
             {formatCentsToBRL(total)}
           </ThemedText>
         </ThemedView>
@@ -66,9 +83,9 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
     borderRadius: Spacing.three,
@@ -77,15 +94,15 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   actionButton: {
     width: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   exportAction: {
-    backgroundColor: '#208AEF',
+    // backgroundColor: '#208AEF',
   },
   actionIcon: {
     fontSize: 22,
